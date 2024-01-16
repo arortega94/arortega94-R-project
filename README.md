@@ -436,3 +436,20 @@ This way we can confirm the patters we were seeing before:
 1. Customers take almost 3 times more rides than Customers
 2. Customers have longer rides than Customers, almost 3 times longer
 ## 6. Creating visualizations
+And finally, let's create some visualizations to share them with the stakeholders, using the package ggplot2
+```r
+all_trips_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Number of rides by day and user type",
+       x = "Day of the week",
+       y = "Number of rides")+
+  guides(fill = guide_legend(title = "Type of user"))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K"))
+```
