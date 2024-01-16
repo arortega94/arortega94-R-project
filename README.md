@@ -276,5 +276,62 @@ tibble [3,818,004 × 13] (S3: tbl_df/tbl/data.frame)
  Max.   :2019-12-31                                                           
                                                                                
 ```
+For clarity purposes, let's change the "member" to "Subscriber" and the "casual" to "Customer":
+```r
+all_trips <-  all_trips %>% 
+  mutate(member_casual = recode(member_casual
+                                ,"Subscriber" = "member"
+                                ,"Customer" = "casual"))
+# Then, let's check the number of observations is correct:
+> table(all_trips$member_casual)
+
+ Customer  Subscriber 
+ 880637    2937367
+```
+Now, for granularity, let's add several columns with the year, month and date for each ride separately:
+```r
+all_trips$date <- as.Date(all_trips$started_at) #The default format is yyyy-mm-dd
+all_trips$month <- format(as.Date(all_trips$date), "%m")
+all_trips$day <- format(as.Date(all_trips$date), "%d")
+all_trips$year <- format(as.Date(all_trips$date), "%Y")
+all_trips$day_of_week <- format(as.Date(all_trips$date), "%A")
+```
+And then let's add a ride length calculation in seconds for further analysis:
+```r
+all_trips$ride_length <- difftime(all_trips$ended_at,all_trips$started_at, units = "secs")
+```
+Now, let's convert the data type of ride_length to numeric so we can run calculations on the data:
+```r
+is.factor(all_trips$ride_length)
+all_trips$ride_length <- as.numeric(as.character(all_trips$ride_length))
+is.numeric(all_trips$ride_length)
+```
+And let's check the structure of the data set for safety:
+```r
+> str(all_trips)
+tibble [3,818,004 × 18] (S3: tbl_df/tbl/data.frame)
+ $ ride_id           : chr [1:3818004] "21742443" "21742444" "21742445" "21742446" ...
+ $ started_at        : POSIXct[1:3818004], format: "2019-01-01 00:04:37" "2019-01-01 00:08:13" ...
+ $ ended_at          : POSIXct[1:3818004], format: "2019-01-01 00:11:07" "2019-01-01 00:15:34" ...
+ $ rideable_type     : chr [1:3818004] "2167" "4386" "1524" "252" ...
+ $ tripduration      : num [1:3818004] 390 441 829 1783 364 ...
+ $ start_station_id  : num [1:3818004] 199 44 15 123 173 98 98 211 150 268 ...
+ $ start_station_name: chr [1:3818004] "Wabash Ave & Grand Ave" "State St & Randolph St" "Racine Ave & 18th St" "California Ave & Milwaukee Ave" ...
+ $ end_station_id    : num [1:3818004] 84 624 644 176 35 49 49 142 148 141 ...
+ $ end_station_name  : chr [1:3818004] "Milwaukee Ave & Grand Ave" "Dearborn St & Van Buren St (*)" "Western Ave & Fillmore St (*)" "Clark St & Elm St" ...
+ $ member_casual     : chr [1:3818004] "member" "member" "member" "member" ...
+ $ gender            : chr [1:3818004] "Male" "Female" "Female" "Male" ...
+ $ birthyear         : num [1:3818004] 1989 1990 1994 1993 1994 ...
+ $ date              : Date[1:3818004], format: "2019-01-01" "2019-01-01" ...
+ $ month             : chr [1:3818004] "01" "01" "01" "01" ...
+ $ day               : chr [1:3818004] "01" "01" "01" "01" ...
+ $ year              : chr [1:3818004] "2019" "2019" "2019" "2019" ...
+ $ day_of_week       : chr [1:3818004] "martes" "martes" "martes" "martes" ...
+ $ ride_length       : num [1:3818004] 390 441 829 1783 364 ...
+```
+And finally, before running the analysis, I realised there are some observations when bikes were taken out of docks and checked for quality by Divvy or ride_length was negative. Since some data is being removed, we will create a second version of the data frame:
+```r
+all_trips_v2 <- all_trips[!(all_trips$start_station_name == "HQ QR" | all_trips$ride_length<0),]
+```
 ## 5. Conducting descriptive analysis
 ## 6. Creating visualizations
