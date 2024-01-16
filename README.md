@@ -10,6 +10,7 @@ I spearheaded a pivotal project aimed at **optimizing annual memberships** for s
 4. Cleaning up and preparing data for analysis
 5. Conducting descriptive analysis
 6. Creating visualizations
+7. Conclussions
 
 ## 1. Preparing the enviroment
 For this analysis we will be using the package **tidyverse**, so we will install it and load it.
@@ -440,8 +441,8 @@ trips_per_user_per_month <- all_trips_v2 %>%
   rename(number_of_rides = ride_id)
 ```
 This way we can confirm the patters we were seeing before:
-1. Customers take almost 3 times more rides than Customers
-2. Customers have longer rides than Customers, almost 3 times longer
+1. Customers take almost 3 times more rides than Subscribers
+2. Customers have longer rides than Subscribers, almost 3 times longer
 ## 6. Creating visualizations
 And finally, let's create some visualizations to share them with the stakeholders, using the package ggplot2
 ```r
@@ -497,3 +498,10 @@ trips_per_user_per_month %>%
   theme(axis.text.x = element_text(angle = 35, hjust = 1))
 ```
 ![rides_usertype_month](images/rides_usertype_month.png)
+
+## 7. Conclussions
+The summary of the insights we can obtain through this analysis are the following:
+1. Customers take almost 3 times more rides than Subscribers
+2. Customers have longer rides than Subscribers, almost 3 times longer
+3. The most popular months to take rides are July and August
+4. The least popular months are February and January
