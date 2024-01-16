@@ -453,3 +453,4 @@ all_trips_v2 %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K"))
 ```
+![alt textrides_per_day_usertype](images/rides_per_day_usertype.png)
