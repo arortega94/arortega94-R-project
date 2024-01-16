@@ -453,4 +453,24 @@ all_trips_v2 %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K"))
 ```
-![alt textrides_per_day_usertype](images/rides_per_day_usertype.png)
+![rides_per_day_usertype](images/rides_per_day_usertype.png)
+
+And finally, let's create another column chart to visualize the **Avergae ride length** by day of the week and user type:
+```r
+all_trips_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual = ifelse(member_casual == "member", "Subscriber", "Customer"), weekday) %>% 
+  summarise(number_of_rides = n(),
+            average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Average Duration by day and user type",
+       x = "Day of the week",
+       y = "Average Duration") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("Subscriber" = "blue", "Customer" = "orange")) +
+  guides(fill = guide_legend(title = "Type of user")) +
+  scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K"))
+```
+![avergae_duration_day_user](images/avergae_duration_day_user.png)
