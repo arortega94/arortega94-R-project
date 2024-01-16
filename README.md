@@ -432,6 +432,13 @@ summarise()` has grouped output by 'member_casual'. You can override using the
 13 Subscriber      "vi\\."          456966             834.
 14 Subscriber      "sá\\."          287163             978.
 ```
+And finnaly let's calculate the number of trips per user per month for later on analysis:
+```r
+trips_per_user_per_month <- all_trips_v2 %>%
+  group_by(member_casual, month) %>%
+  summarise(ride_id = n()) %>% 
+  rename(number_of_rides = ride_id)
+```
 This way we can confirm the patters we were seeing before:
 1. Customers take almost 3 times more rides than Customers
 2. Customers have longer rides than Customers, almost 3 times longer
@@ -474,3 +481,19 @@ all_trips_v2 %>%
   scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K"))
 ```
 ![avergae_duration_day_user](images/avergae_duration_day_user.png)
+
+And let's take a look to the distribution of rides per usertype and month of the year:
+```r
+trips_per_user_per_month %>%
+  ggplot() + 
+  geom_col(mapping = aes(x = month, y = number_of_rides, fill = member_casual),
+           position = position_stack(reverse = TRUE)) +
+  labs(title = "Number of rides per user by month",
+       subtitle = "From January to December, 2019",
+       y = " ") +
+  scale_fill_discrete(name = "Type of user") +
+  scale_x_discrete(name = "Month", labels = month.name) +
+  scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K")) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+```
+![rides_usertype_month](images/arides_usertype_month.png)
