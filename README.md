@@ -334,4 +334,105 @@ And finally, before running the analysis, I realised there are some observations
 all_trips_v2 <- all_trips[!(all_trips$start_station_name == "HQ QR" | all_trips$ride_length<0),]
 ```
 ## 5. Conducting descriptive analysis
+Let's run some basic statistical calculations on ride_length:
+```r
+> mean(all_trips_v2$ride_length) #straight average (total ride length / rides)
+[1] 1450.466
+> median(all_trips_v2$ride_length) #midpoint number in the ascending array of ride lengths
+[1] 709
+> max(all_trips_v2$ride_length) #longest ride
+[1] 10632022
+> min(all_trips_v2$ride_length) #shortest rid
+[1] 61
+```
+Which can also be obtained with the summary function:
+```r
+> summary(all_trips_v2$ride_length)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+      61      411      709     1450     1284 10632022
+```
+Now, we are getting closer to the actual problem of the case study. Let's compare the 2 types of users:
+```r
+aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = mean)
+aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = median)
+aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = max)
+aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = min)
+
+> aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = mean)
+  all_trips_v2$member_casual all_trips_v2$ride_length
+1                     Customer                3421.0811
+2                     Subscriber              859.6681
+> aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = median)
+  all_trips_v2$member_casual all_trips_v2$ride_length
+1                     Customer                 1550
+2                     Subscriber               588
+> aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = max)
+  all_trips_v2$member_casual all_trips_v2$ride_length
+1                     Customer                 10632022
+2                     Subscriber               9056634
+> aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = min)
+  all_trips_v2$member_casual all_trips_v2$ride_length
+1                     Customer                  61
+2                     Subscriber                61
+```
+We can already see some interesting insights:
+1. The Subscriber has in average shorter rides, which might be caused due to the nature of the casual tickets, which are min. 1 hour, max. 1 day.
+2. The max time for a ride length is way bigger in Customers, which confirms our initial hypothesis.
+
+Let's see the average ride time by each day for Subscribers vs Customers
+```r
+aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
+
+> aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
+   all_trips_v2$member_casual all_trips_v2$day_of_week all_trips_v2$ride_length
+1                      Customer                  Sunday                3371.1117
+2                      Subscriber                  Sunday                 924.1741
+3                      Customer                    Monday                3269.9934
+4                      Subscriber                    Monday                 854.9570
+5                      Customer                   Tuesday                3444.7970
+6                      Subscriber                   Tuesday                 849.1555
+7                      Customer                Wednesday                3620.0440
+8                      Subscriber                Wednesday                 828.5907
+9                      Customer                   Thursday                3597.0674
+10                     Subscriber                   Thursday                 826.7875
+11                     Customer                  Friday                3610.5366
+12                     Subscriber                  Friday                 833.8487
+13                     Customer                   Saturday                3243.6666
+14                     Subscriber                   Saturday                 978.1623
+```
+We can check the pattern is repeats. In addittion, we can see that Wednesday and Fridays are the days with the most rides for Customers, while Saturday and Sundays are for Subscribers.
+
+Let's try to aggregate both calculations together under one table:
+```r
+all_trips_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>%  #creates weekday field using wday()
+  group_by(member_casual, weekday) %>%  #groups by usertype and weekday
+  summarise(number_of_rides = n()							#calculates the number of rides and average duration 
+            ,average_duration = mean(ride_length)) %>% 		# calculates the average duration
+  arrange(member_casual, weekday)								# sorts
+
+summarise()` has grouped output by 'member_casual'. You can override using the
+`.groups` argument.
+# A tibble: 14 × 4
+# Groups:   member_casual [2]
+   member_casual weekday   number_of_rides average_duration
+   <chr>         <ord>             <int>            <dbl>
+ 1 Customer        "do\\."          170173            3371.
+ 2 Customer        "lu\\."          101489            3270.
+ 3 Customer        "ma\\."           88655            3445.
+ 4 Customer        "mi\\."           89745            3620.
+ 5 Customer        "ju\\."          101372            3597.
+ 6 Customer        "vi\\."          121141            3611.
+ 7 Customer        "sá\\."          208056            3244.
+ 8 Subscriber      "do\\."          256234             924.
+ 9 Subscriber      "lu\\."          458780             855.
+10 Subscriber      "ma\\."          497025             849.
+11 Subscriber      "mi\\."          494277             829.
+12 Subscriber      "ju\\."          486915             827.
+13 Subscriber      "vi\\."          456966             834.
+14 Subscriber      "sá\\."          287163             978.
+```
+This way we can confirm the patters we were seeing before:
+1. Customers take almost 3 times more rides than Customers
+2. Customers have longer rides than Customers, almost 3 times longer
 ## 6. Creating visualizations
