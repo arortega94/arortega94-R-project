@@ -496,4 +496,4 @@ trips_per_user_per_month %>%
   scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K")) +
   theme(axis.text.x = element_text(angle = 35, hjust = 1))
 ```
-![rides_usertype_month](images/arides_usertype_month.png)
+![rides_usertype_month](images/rides_usertype_month.png)
